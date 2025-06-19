@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState,useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Send, Github, Linkedin, Twitter } from 'lucide-react';
 import { contactInfo } from '../datas/constantData';
+import emailjs from '@emailjs/browser';
+import {toast} from 'react-hot-toast';
 interface FormData {
   name: string;
   email: string;
@@ -11,19 +13,18 @@ interface FormData {
 }
 
 const Contact: React.FC = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const form = useRef<HTMLFormElement>(null);
   const { ref, inView } = useInView({
     threshold: 0.3,
     triggerOnce: true
   });
-
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     subject: '',
     message: ''
   });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -36,16 +37,28 @@ const Contact: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setFormData({ name: '', email: '', subject: '', message: '' });
-      alert('Thank you for your message! I\'ll get back to you soon.');
-    }, 2000);
+    emailjs.sendForm(
+      import.meta.env.VITE_API_SERVICE_ID,
+      import.meta.env.VITE_API_TEMPLATE_ID,
+      form.current as HTMLFormElement,
+      import.meta.env.VITE_API_PUBLIC_KEY
+    )
+      .then((response) => {
+        toast.success('Message sent successfully!');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+        if (form.current) {
+          form.current.reset();
+        }
+        
+      })
+      .catch((error) => {
+       
+        toast.error('Failed to send message. Please try again later.');
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
-
-
 
   const socialLinks = [
     { icon: Github, href: 'https://github.com/Gasorekibo', label: 'GitHub' },
@@ -137,7 +150,7 @@ const Contact: React.FC = () => {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8"
           >
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form ref={form} onSubmit={handleSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
