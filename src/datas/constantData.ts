@@ -18,7 +18,7 @@ export  const projects = [
       icon: Users,
       color: 'from-green-500 to-teal-600',
       github: 'https://github.com/Gasorekibo/mama_care.git',
-      demo: 'https://mamacare.app',
+      demo: 'https://59d828ea.mama-care-frontend.pages.dev/',
       image: 'https://images.pexels.com/photos/3952238/pexels-photo-3952238.jpeg?auto=compress&cs=tinysrgb&w=800'
     },
     {
