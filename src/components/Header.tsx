@@ -40,9 +40,9 @@ const Header: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-2xl font-bold text-primary-600 dark:text-primary-400"
+            className="text-2xl font-bold text-primary-600 dark:text-blue-500"
           >
-            Gasore M.
+            M.<span className="text-gray-900 dark:text-white">Gasore</span>
           </motion.div>
 
           {/* Desktop Navigation */}
