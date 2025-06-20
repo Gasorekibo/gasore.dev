@@ -28,7 +28,7 @@ export  const projects = [
       icon: Shield,
       color: 'from-blue-500 to-indigo-600',
       github: 'https://github.com/Gasorekibo/mugombwa.git',
-      demo: 'https://mugombwa-hub.org',
+      demo: 'https://mugombwa.m-gasore.workers.dev/',
       image: 'https://images.pexels.com/photos/6646918/pexels-photo-6646918.jpeg?auto=compress&cs=tinysrgb&w=800'
     },
     {
