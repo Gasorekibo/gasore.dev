@@ -1,27 +1,21 @@
-import { ThemeProvider } from './contexts/ThemeContext';
-import Header from './components/Header';
-import Hero from './components/Hero';
-import About from './components/About';
-import Skills from './components/Skills';
-import Projects from './components/Projects';
-import Testimonials from './components/Testimonials';
-import Contact from './components/Contact';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import Work from "./pages/Work";
+import Header from "./components/Header";
+import Contact from "./pages/Contact";
+import Footer from "./components/Footer";
 
 function App() {
   return (
-    <ThemeProvider>
-      <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
-        <Header />
-        <main>
-          <Hero />
-          {/* <About /> */}
-          {/* <Skills /> */}
-          <Projects />
-          <Testimonials />
-          <Contact />
-        </main>
-      </div>
-    </ThemeProvider>
+    <BrowserRouter>
+     <Header/>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/work" element={<Work />} />
+        <Route path="/contact" element={<Contact />} />
+      </Routes>
+      <Footer />
+    </BrowserRouter>
   );
 }
 

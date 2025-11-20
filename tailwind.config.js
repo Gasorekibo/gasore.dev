@@ -1,27 +1,22 @@
-/** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
-  darkMode: 'class',
+  content: ["./index.html", "./src/**/*.{tsx,ts}"],
   theme: {
     extend: {
-      animation: {
-        'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      colors: {
+        bg: "#0a0a0a",
+        text: "#aaaaaa",
+        heading: "#ffffff",
+        meta: "#666666",
+        primary: "#E8563A",
+        secondary: "#2F4538",
       },
-      keyframes: {
-        pulse: {
-          '0%, 100%': {
-            opacity: '1',
-          },
-          '50%': {
-            opacity: '.5',
-          },
-        },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
-      colors:{
-        primary: '#1DA1F2',
-        secondary: '#14171A',
+      fontWeight: {
+        light: '300',
+        normal: '400',
       },
     },
   },
-  plugins: [],
-};
+}

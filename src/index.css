@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html { scroll-behavior: smooth; }
+body { @apply bg-bg text-text antialiased; background-color: #0a0a0a; }
+::-moz-selection { background: #E8563A; color: #000; }
+::selection { background: #E8563A; color: #000; }
+
+.animate-bounce {
+  animation: bounce 2s infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
+}
