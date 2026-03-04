@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.saintaristide.me)",
+      "WebFetch(domain:p5aholic.me)",
+      "WebFetch(domain:dunks1980.com)"
+    ]
+  }
+}

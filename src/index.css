@@ -2,15 +2,80 @@
 @tailwind components;
 @tailwind utilities;
 
-html { scroll-behavior: smooth; }
-body { @apply bg-bg text-text antialiased; background-color: #0a0a0a; }
-::-moz-selection { background: #E8563A; color: #000; }
-::selection { background: #E8563A; color: #000; }
-
-.animate-bounce {
-  animation: bounce 2s infinite;
+/* ─── Theme variables ──────────────────────────────────────────────────────── */
+:root {
+  /* Dark (default) */
+  --bg:         #0a0a0a;
+  --bg-rgb:     10, 10, 10;
+  --surface:    #141414;
+  --heading:    #ffffff;
+  --body:       #aaaaaa;
+  --muted:      #555555;
+  --border:     rgba(255, 255, 255, 0.06);
+  --border-md:  rgba(255, 255, 255, 0.14);
+  --grain:      0.04;
 }
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(10px); }
+
+:root.light {
+  --bg:         #f5f3ee;
+  --bg-rgb:     245, 243, 238;
+  --surface:    #eceae4;
+  --heading:    #0f0f0f;
+  --body:       #444444;
+  --muted:      #888888;
+  --border:     rgba(0, 0, 0, 0.07);
+  --border-md:  rgba(0, 0, 0, 0.16);
+  --grain:      0.025;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--bg);
+  color: var(--body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::-moz-selection { background: #E8563A; color: #fff; }
+::selection      { background: #E8563A; color: #fff; }
+
+/* ─── Custom cursor ────────────────────────────────────────────────────────── */
+@media (hover: hover) and (pointer: fine) {
+  *, *::before, *::after { cursor: none !important; }
+}
+
+/* ─── Film grain overlay ───────────────────────────────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: var(--grain);
+  pointer-events: none;
+  z-index: 9990;
+}
+
+/* ─── Marquee ──────────────────────────────────────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 45s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* ─── Line draw-in ─────────────────────────────────────────────────────────── */
+@keyframes draw-x {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
 }

@@ -1,144 +1,182 @@
 // src/pages/Contact.tsx
+// ─── EmailJS setup ────────────────────────────────────────────────────────────
+// 1. Install: npm install @emailjs/browser   (the package currently named "emailjs" may be
+//    the SMTP library – if send() throws, swap the import to "@emailjs/browser")
+// 2. Create a free account at https://www.emailjs.com
+// 3. Add a Gmail service → get your Service ID
+// 4. Create an email template with variables:
+//    {{from_name}}, {{from_email}}, {{message}}, {{interests}}
+//    Set "To Email" to gasoremugwaneza@gmail.com in the template
+// 5. Copy your Public Key from Account → API Keys
+// 6. Create .env in project root:
+//    VITE_EMAILJS_SERVICE_ID=service_xxxxxxx
+//    VITE_EMAILJS_TEMPLATE_ID=template_xxxxxxx
+//    VITE_EMAILJS_PUBLIC_KEY=xxxxxxxxxxxxxx
+// ─────────────────────────────────────────────────────────────────────────────
 import { useState } from "react";
+import { motion } from "framer-motion";
+import emailjs from "@emailjs/browser";
 
 const interests = [
-  "Full-Stack Web Applications",
-  "SAP BTP / Cloud Solutions",
-  "Enterprise Integration (CPI)",
-  "SAP UI5 / Fiori Development",
-  "AI-Powered Solutions",
-  "WhatsApp & Messaging Bots",
-  "Healthcare Tech Solutions",
-  "Education Technology",
-  "Technology for Social Impact",
-  "Scalable Cloud Architecture",
-  "Real-time Notifications",
-  "Open Source Contributions",
+  "Full-Stack", "SAP BTP", "AI Solutions", "WhatsApp Bots",
+  "HealthTech", "EdTech", "Cloud Architecture", "Real-time Apps",
+  "Enterprise Integration", "Open Source",
 ];
 
-const PRIMARY = "#E8563A";
+const LINE =
+  "w-full bg-transparent border-0 border-b border-[var(--border-md)] focus:border-primary outline-none text-[var(--heading)] placeholder-[var(--muted)] py-5 text-xl transition-colors duration-300 font-light";
+
+type Status = "idle" | "sending" | "sent" | "error";
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    project: "",
-    interests: [] as string[],
-  });
-
+  const [form, setForm] = useState({ name: "", email: "", project: "", interests: [] as string[] });
   const [errors, setErrors] = useState({ name: false, email: false, project: false });
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<Status>("idle");
 
-  const toggleInterest = (item: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      interests: prev.interests.includes(item)
-        ? prev.interests.filter((i) => i !== item)
-        : [...prev.interests, item],
+  const toggle = (item: string) =>
+    setForm((p) => ({
+      ...p,
+      interests: p.interests.includes(item) ? p.interests.filter((i) => i !== item) : [...p.interests, item],
     }));
-  };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const newErrors = {
-      name: !formData.name.trim(),
-      email: !formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email),
-      project: !formData.project.trim(),
+      name:    !form.name.trim(),
+      email:   !form.email.trim() || !/\S+@\S+\.\S+/.test(form.email),
+      project: !form.project.trim(),
     };
-
     setErrors(newErrors);
-
     if (Object.values(newErrors).some(Boolean)) return;
 
-    // SUCCESS: Log + Reset form + Show message
-    console.log("Contact Form Submitted:", {
-      ...formData,
-      timestamp: new Date().toISOString(),
-    });
-
-    setFormData({ name: "", email: "", project: "", interests: [] }); // Reset
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
+    setStatus("sending");
+    try {
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID  as string,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID as string,
+        {
+          from_name:  form.name,
+          from_email: form.email,
+          message:    form.project,
+          interests:  form.interests.join(", ") || "None specified",
+          to_email:   "gasoremugwaneza@gmail.com",
+        },
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY as string
+      );
+      setForm({ name: "", email: "", project: "", interests: [] });
+      setStatus("sent");
+      setTimeout(() => setStatus("idle"), 6000);
+    } catch {
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 5000);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-6 py-24">
-      <div className="w-full max-w-3xl mx-auto space-y-20">
-        <div className="text-center mt-8">
-          <h1 className="text-6xl md:text-8xl font-light text-white mb-4">Get in touch</h1>
-          <p className="text-gray-500 text-xl">I'm interested in...</p>
-        </div>
+    <div className="min-h-screen bg-[var(--bg)] px-6 md:px-12 lg:px-16 pt-40 pb-32">
+      <div className="max-w-4xl mx-auto">
 
-        <form onSubmit={handleSubmit} className="space-y-16">
+        {/* Heading */}
+        <motion.div className="mb-16 md:mb-20"
+          initial={{ opacity: 0, y: 36 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}>
+          <p className="text-[10px] tracking-[0.6em] text-[var(--muted)] uppercase mb-6">Get in touch</p>
+          <h1 className="font-light text-[var(--heading)] leading-[0.88] tracking-tighter"
+            style={{ fontSize: "clamp(3.5rem, 13vw, 11rem)" }}>
+            LET'S<br /><span className="text-primary">TALK.</span>
+          </h1>
+        </motion.div>
+
+        <form onSubmit={handleSubmit}>
+
+          {/* Name */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}>
+            <label className="text-[10px] tracking-[0.4em] text-[var(--muted)] uppercase">Your name</label>
+            <input type="text" placeholder="Gasore Mugwaneza" value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className={`${LINE} ${errors.name ? "border-red-500/60" : ""}`} />
+            {errors.name && <p className="text-red-400 text-xs mt-1 tracking-wider">Required.</p>}
+          </motion.div>
+
+          {/* Email */}
+          <motion.div className="mt-10" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}>
+            <label className="text-[10px] tracking-[0.4em] text-[var(--muted)] uppercase">Your email</label>
+            <input type="email" placeholder="hello@example.com" value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className={`${LINE} ${errors.email ? "border-red-500/60" : ""}`} />
+            {errors.email && <p className="text-red-400 text-xs mt-1 tracking-wider">Valid email required.</p>}
+          </motion.div>
+
+          {/* Project */}
+          <motion.div className="mt-10" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}>
+            <label className="text-[10px] tracking-[0.4em] text-[var(--muted)] uppercase">Your project</label>
+            <textarea rows={3} placeholder="Tell me what you're building..."
+              value={form.project} onChange={(e) => setForm({ ...form, project: e.target.value })}
+              className={`${LINE} resize-none ${errors.project ? "border-red-500/60" : ""}`} />
+            {errors.project && <p className="text-red-400 text-xs mt-1 tracking-wider">Required.</p>}
+          </motion.div>
+
           {/* Interests */}
-          <div className="grid grid-cols-2 gap-4">
-            {interests.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => toggleInterest(item)}
-                className={`px-5 py-4 rounded-full text-sm font-medium text-center transition-all duration-300 border ${
-                  formData.interests.includes(item)
-                    ? `bg-[${PRIMARY}] text-white border-[${PRIMARY}]`
-                    : "bg-transparent text-gray-400 border-gray-800 hover:border-primary hover:text-white"
-                }`}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-
-          {/* Form Fields */}
-          <div className="space-y-10">
-            <input
-              type="text"
-              placeholder="Your name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className={`w-full bg-gray-900/50 backdrop-blur-sm rounded-full px-8 py-5 text-white placeholder-gray-500 text-lg outline-none transition-all ${
-                errors.name ? "border-2 border-red-500" : "border border-gray-800 focus:border-primary"
-              }`}
-            />
-            {errors.name && <p className="text-red-400 text-sm -mt-6 ml-4">Please fill out this field.</p>}
-
-            <input
-              type="email"
-              placeholder="Your email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className={`w-full bg-gray-900/50 backdrop-blur-sm rounded-full px-8 py-5 text-white placeholder-gray-500 text-lg outline-none transition-all ${
-                errors.email ? "border-2 border-red-500" : "border border-gray-800 focus:border-primary"
-              }`}
-            />
-            {errors.email && <p className="text-red-400 text-sm -mt-6 ml-4">Please enter a valid email.</p>}
-
-            <textarea
-              rows={6}
-              placeholder="Tell us about your project"
-              value={formData.project}
-              onChange={(e) => setFormData({ ...formData, project: e.target.value })}
-              className={`w-full bg-gray-900/50 backdrop-blur-sm rounded-3xl px-8 py-6 text-white placeholder-gray-500 text-lg outline-none resize-none transition-all ${
-                errors.project ? "border-2 border-red-500" : "border border-gray-800 focus:border-primary"
-              }`}
-            />
-            {errors.project && <p className="text-red-400 text-sm -mt-6 ml-4">Please fill out this field.</p>}
-
-            <div className="text-center pt-8">
-              <button
-                type="submit"
-                className="px-16 py-5 bg-transparent border-2 border-primary text-white rounded-full text-lg font-medium hover:bg-primary hover:text-white transition-all duration-500 uppercase tracking-wider"
-              >
-                Send Request
-              </button>
+          <motion.div className="mt-14" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}>
+            <p className="text-[10px] tracking-[0.4em] text-[var(--muted)] uppercase mb-5">Interested in</p>
+            <div className="flex flex-wrap gap-2">
+              {interests.map((item) => (
+                <button key={item} type="button" onClick={() => toggle(item)}
+                  className={`text-xs px-4 py-2 rounded-full border transition-all duration-300 tracking-wide ${
+                    form.interests.includes(item)
+                      ? "bg-primary border-primary text-white"
+                      : "border-[var(--border-md)] text-[var(--muted)] hover:border-primary/60 hover:text-[var(--body)]"
+                  }`}>
+                  {item}
+                </button>
+              ))}
             </div>
-          </div>
+          </motion.div>
+
+          {/* Submit */}
+          <motion.div className="mt-16" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.65 }}>
+            <button type="submit" disabled={status === "sending"}
+              className="group flex items-center gap-4 text-[var(--heading)] disabled:opacity-50 transition-opacity">
+              <span className="text-sm tracking-[0.35em] uppercase border-b border-primary pb-1 group-hover:border-[var(--heading)] transition-colors duration-300">
+                {status === "sending" ? "Sending..." : "Send Message"}
+              </span>
+              <span className={`w-9 h-9 rounded-full border border-primary flex items-center justify-center text-sm transition-all duration-300 ${
+                status === "sending" ? "animate-spin border-primary/30" : "group-hover:bg-primary group-hover:text-white"
+              }`}>
+                {status === "sending" ? "○" : "→"}
+              </span>
+            </button>
+          </motion.div>
         </form>
-        {submitted && (
-          <p className="text-center text-green-400 text-xl font-light animate-pulse absolute bottom-10 left-1/2 transform -translate-x-1/2">
-            Message sent successfully!
-          </p>
+
+        {/* Feedback */}
+        {status === "sent" && (
+          <motion.p className="mt-8 text-green-400 text-sm tracking-[0.3em] uppercase"
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+            ✓ Message sent — I'll be in touch soon.
+          </motion.p>
         )}
+        {status === "error" && (
+          <motion.p className="mt-8 text-red-400 text-sm tracking-[0.3em] uppercase"
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+            ✕ Something went wrong. Please email me directly.
+          </motion.p>
+        )}
+
+        {/* Info row */}
+        <motion.div
+          className="mt-24 pt-8 border-t border-[var(--border)] flex flex-col sm:flex-row justify-between gap-4 text-[var(--muted)] text-[10px] tracking-[0.35em] uppercase"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}>
+          <span>Kigali, Rwanda</span>
+          <a href="mailto:gasoremugwaneza@gmail.com"
+            className="hover:text-primary transition-colors">gasoremugwaneza@gmail.com</a>
+          <span>Remote · Worldwide</span>
+        </motion.div>
       </div>
     </div>
   );
