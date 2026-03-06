@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 // ─── Interactive dot grid ────────────────────────────────────────────────────
 function ParticleField() {
@@ -75,6 +75,55 @@ function ParticleField() {
   );
 }
 
+// ─── Atmospheric hero photo ───────────────────────────────────────────────────
+function HeroPhoto() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "12%"]);
+
+  return (
+    <motion.div
+      ref={ref}
+      className="absolute right-0 top-0 h-full hidden lg:block"
+      style={{ width: "48%" }}
+      initial={{ opacity: 0, clipPath: "inset(0 100% 0 0)" }}
+      animate={{ opacity: 1, clipPath: "inset(0 0% 0 0)" }}
+      transition={{ duration: 1.4, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {/* Wide left gradient — pushes the visible photo edge far right, keeping name area clear */}
+      <div
+        className="absolute inset-0 z-10 pointer-events-none"
+        style={{
+          background: "linear-gradient(to right, var(--bg) 0%, var(--bg) 18%, transparent 55%, transparent 80%, var(--bg) 100%)",
+        }}
+      />
+      {/* Top + bottom vignette */}
+      <div
+        className="absolute inset-0 z-10 pointer-events-none"
+        style={{
+          background: "linear-gradient(to bottom, var(--bg) 0%, transparent 20%, transparent 78%, var(--bg) 100%)",
+        }}
+      />
+      {/* Dark overlay — tones down the bright white photo background */}
+      <div className="absolute inset-0 z-[9] pointer-events-none bg-[var(--bg)]/40" />
+      {/* Primary colour wash */}
+      <div className="absolute inset-0 z-[11] pointer-events-none bg-primary/[0.05] mix-blend-color" />
+
+      {/* The photo itself */}
+      <motion.img
+        src="/projects/ELYS2272.jpg"
+        alt=""
+        aria-hidden
+        className="absolute inset-0 w-full h-[115%] -top-[8%] object-cover object-center"
+        style={{
+          y,
+          filter: "brightness(0.68) contrast(1.1) grayscale(15%) saturate(0.85)",
+        }}
+      />
+    </motion.div>
+  );
+}
+
 // ─── Marquee ─────────────────────────────────────────────────────────────────
 function Marquee() {
   const words = "FULL STACK  ·  REACT  ·  NODE.JS  ·  SAP BTP  ·  RWANDA  ·  TYPESCRIPT  ·  AI INTEGRATIONS  ·  OPEN TO WORK  ·  ";
@@ -95,28 +144,11 @@ export default function Home() {
     <div className="min-h-screen flex flex-col bg-[var(--bg)] relative overflow-hidden">
       <ParticleField />
 
+      {/* Large atmospheric hero photo — behind content */}
+      <HeroPhoto />
+
       <div className="relative z-10 flex-1 flex flex-col justify-center px-6 md:px-12 lg:px-16 pt-32 pb-10">
         <div className="max-w-screen-2xl mx-auto w-full">
-
-          {/* Profile photo — desktop */}
-          <motion.div
-            className="hidden lg:block absolute right-12 xl:right-20 top-1/2 -translate-y-[60%]"
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div className="relative w-56 h-72 overflow-hidden">
-              <img src="./projects/project4.png" alt="M.Gasore"
-                className="absolute inset-0 w-full h-full object-cover grayscale-[20%] contrast-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/15 via-transparent to-transparent" />
-              <div className="absolute bottom-0 right-0 w-8 h-8 bg-[var(--bg)]"
-                style={{ clipPath: "polygon(100% 0, 100% 100%, 0 100%)" }} />
-            </div>
-            <div className="mt-3 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-[10px] tracking-[0.3em] text-[var(--muted)] uppercase">Available for work</span>
-            </div>
-          </motion.div>
 
           {/* Eyebrow */}
           <motion.p className="text-[10px] tracking-[0.6em] text-[var(--muted)] uppercase mb-6"
@@ -124,7 +156,7 @@ export default function Home() {
             Software Engineer & Web Developer
           </motion.p>
 
-          {/* Name — 16vw fits "M.GASORE" within padded container on all viewports */}
+          {/* Name */}
           <div className="overflow-hidden">
             <motion.h1
               className="font-light leading-[0.82] tracking-tighter text-[var(--heading)] whitespace-nowrap"
@@ -143,37 +175,58 @@ export default function Home() {
             transition={{ duration: 0.9, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
             style={{ transformOrigin: "left" }} />
 
-          {/* Bottom section — left-aligned so nothing collides with the right-side photo */}
-          <motion.div
-            className="max-w-lg"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.75 }}
-          >
-            <p className="text-[var(--body)] text-lg md:text-xl font-light leading-relaxed">
-              Building digital experiences from Rwanda to the world.
-              <br />
-              <span className="text-[var(--muted)]">Full-stack · SAP BTP · AI integrations.</span>
-            </p>
+          {/* Bottom — description + CTA */}
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10 lg:gap-0">
 
             <motion.div
+              className="max-w-lg"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.75 }}
+            >
+              <p className="text-[var(--body)] text-lg md:text-xl font-light leading-relaxed">
+                Building digital experiences from Rwanda to the world.
+                <br />
+                <span className="text-[var(--muted)]">Full-stack · SAP BTP · AI integrations.</span>
+              </p>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.95 }}
+                className="mt-8 flex items-center gap-5"
+              >
+                <Link to="/work"
+                  className="group inline-flex items-center gap-3 border border-[var(--border-md)] px-7 py-4 rounded-full text-[var(--heading)] text-xs tracking-[0.3em] uppercase hover:bg-primary hover:border-primary hover:text-white transition-all duration-500">
+                  View Work
+                  <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+                </Link>
+                <Link to="/contact"
+                  className="text-xs tracking-[0.3em] uppercase text-[var(--muted)] hover:text-primary transition-colors duration-300">
+                  Let's Talk ↗
+                </Link>
+              </motion.div>
+            </motion.div>
+
+            {/* Photo credit / location tag — desktop only, sits bottom-right beside the image */}
+            <motion.div
+              className="hidden lg:flex flex-col items-end gap-1 pb-1 pr-[50%]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.95 }}
-              className="mt-8"
+              transition={{ delay: 1.6, duration: 0.8 }}
             >
-              <Link to="/work"
-                className="group inline-flex items-center gap-3 border border-[var(--border-md)] px-7 py-4 rounded-full text-[var(--heading)] text-xs tracking-[0.3em] uppercase hover:bg-primary hover:border-primary hover:text-white transition-all duration-500">
-                View Work
-                <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-              </Link>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                <span className="text-[10px] tracking-[0.35em] text-[var(--muted)] uppercase">Available for work</span>
+              </div>
+              <span className="text-[9px] tracking-[0.3em] text-[var(--muted)]/50 uppercase">Based in Kigali, Rwanda</span>
             </motion.div>
-          </motion.div>
+          </div>
 
-          {/* Mobile avatar */}
+          {/* Mobile — avatar strip */}
           <motion.div className="lg:hidden flex items-center gap-3 mt-12"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1 }}>
-            <img src="./projects/project4.png" alt="M.Gasore"
+            <img src="/projects/profile.jpeg" alt="M.Gasore"
               className="w-10 h-10 rounded-full object-cover border border-[var(--border-md)]" />
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
