@@ -5,6 +5,7 @@ import { projects } from "../data/projects";
 
 // ─── Lightbox ────────────────────────────────────────────────────────────────
 function Lightbox({ src, onClose }: { src: string; onClose: () => void }) {
+  console.log("Opening lightbox with src:", src);
   return (
     <AnimatePresence>
       <motion.div
